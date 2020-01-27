@@ -1,0 +1,12 @@
+steps:
+- name: gcr.io/cloud-builders/git
+  args: ['clone', 'https://github.com/bipinupd/dataflow-code.git']
+  id: 'check-out-source-code'
+- name: gcr.io/cloud-builders/mvn
+  args: ['package', '-q']
+  dir: '$REPO_NAME/dataflow-code'
+  id: 'build-jar'
+- name: gcr.io/cloud-builders/gsutil
+  args: ['cp', '*bundled*.jar', 'gs://${DATAFLOW_JAR_BUCKET}/dataflow_deployment_$BUILD_ID.jar']
+  dir: '$REPO_NAME/data-processing-code/target'
+  id: 'deploy-jar'
