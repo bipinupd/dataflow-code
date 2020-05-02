@@ -1,5 +1,6 @@
 package org.apache.beam.examples;
 
+import org.apache.beam.runners.dataflow.options.DataflowPipelineOptions;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.io.TextIO;
 import org.apache.beam.sdk.metrics.Counter;
@@ -18,51 +19,6 @@ import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.SimpleFunction;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PCollection;
-
-/**
- * An example that counts words in Shakespeare and includes Beam best practices.
- *
- * <p>This class, {@link WordCount}, is the second in a series of four successively more detailed
- * 'word count' examples. You may first want to take a look at {@link MinimalWordCount}. After
- * you've looked at this example, then see the {@link DebuggingWordCount} pipeline, for introduction
- * of additional concepts.
- *
- * <p>For a detailed walkthrough of this example, see <a
- * href="https://beam.apache.org/get-started/wordcount-example/">
- * https://beam.apache.org/get-started/wordcount-example/ </a>
- *
- * <p>Basic concepts, also in the MinimalWordCount example: Reading text files; counting a
- * PCollection; writing to text files
- *
- * <p>New Concepts:
- *
- * <pre>
- *   1. Executing a Pipeline both locally and using the selected runner
- *   2. Using ParDo with static DoFns defined out-of-line
- *   3. Building a composite transform
- *   4. Defining your own pipeline options
- * </pre>
- *
- * <p>Concept #1: you can execute this pipeline either locally or using by selecting another runner.
- * These are now command-line options and not hard-coded as they were in the MinimalWordCount
- * example.
- *
- * <p>To change the runner, specify:
- *
- * <pre>{@code
- * --runner=YOUR_SELECTED_RUNNER
- * }</pre>
- *
- * <p>To execute this pipeline, specify a local output file (if using the {@code DirectRunner}) or
- * output prefix on a supported distributed file system.
- *
- * <pre>{@code
- * --output=[YOUR_LOCAL_FILE | YOUR_OUTPUT_PREFIX]
- * }</pre>
- *
- * <p>The input file defaults to a public data set containing the text of of King Lear, by William
- * Shakespeare. You can override it and choose your own input with {@code --inputFile}.
- */
 public class WordCount {
 
   /**
@@ -70,11 +26,12 @@ public class WordCount {
    * statically out-of-line. This DoFn tokenizes lines of text into individual words; we pass it to
    * a ParDo in the pipeline.
    */
+  public static final String TOKENIZER_PATTERN = "[^\\p{L}]+";
+
   static class ExtractWordsFn extends DoFn<String, String> {
     private final Counter emptyLines = Metrics.counter(ExtractWordsFn.class, "emptyLines");
     private final Distribution lineLenDist =
         Metrics.distribution(ExtractWordsFn.class, "lineLenDistro");
-    private static final String TOKENIZER_PATTERN = "[^\\p{L}]+";
 
     @ProcessElement
     public void processElement(@Element String element, OutputReceiver<String> receiver) {
@@ -135,7 +92,7 @@ public class WordCount {
    *
    * <p>Inherits standard configuration options.
    */
-  public interface WordCountOptions extends PipelineOptions {
+  public interface WordCountOptions extends DataflowPipelineOptions {
 
     /**
      * By default, this example reads from a public dataset containing the text of King Lear. Set
@@ -171,6 +128,7 @@ public class WordCount {
   public static void main(String[] args) {
     WordCountOptions options =
         PipelineOptionsFactory.fromArgs(args).withValidation().as(WordCountOptions.class);
+
     runWordCount(options);
   }
 }
