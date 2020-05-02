@@ -25,40 +25,15 @@
     <version>0.1</version>
     <packaging>jar</packaging>
     <properties>
-        <beam.version>2.11.0</beam.version>
-        <google-clients.version>1.27.0</google-clients.version>
-        <guava.version>20.0</guava.version>
-        <hamcrest.version>1.3</hamcrest.version>
-        <jackson.version>2.9.8</jackson.version>
-        <joda.version>2.4</joda.version>
-        <junit.version>4.13-beta-1</junit.version>
-        <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
-        <maven-exec-plugin.version>1.6.0</maven-exec-plugin.version>
-        <maven-jar-plugin.version>3.0.2</maven-jar-plugin.version>
-        <maven-shade-plugin.version>3.1.0</maven-shade-plugin.version>
-        <mockito.version>1.10.19</mockito.version>
-        <slf4j.version>1.7.25</slf4j.version>
-        <maven-surefire-plugin.version>2.21.0</maven-surefire-plugin.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <dataflow>2.20.0</dataflow>
     </properties>
-    <repositories>
-        <repository>
-            <id>apache.snapshots</id>
-            <name>Apache Development Snapshot Repository</name>
-            <url>https://repository.apache.org/content/repositories/snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -66,37 +41,7 @@
             </plugin>
             <!-- Ensure that the Maven jar plugin runs before the Maven
         shade plugin by listing the plugin higher within the file. -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven-surefire-plugin.version}</version>
-                <configuration>
-                    <parallel>all</parallel>
-                    <threadCount>4</threadCount>
-                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.maven.surefire</groupId>
-                        <artifactId>surefire-junit47</artifactId>
-                        <version>${maven-surefire-plugin.version}</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>${maven-jar-plugin.version}</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>org.apache.beam.examples.WordCount</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
+
             <!--
         Configures `mvn package` to produce a bundled jar ("fat jar") for runners
         that require this for job submission to a cluster.
@@ -104,7 +49,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>${maven-shade-plugin.version}</version>
+                <version>3.2.1</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -145,127 +90,109 @@
             </plugins>
         </pluginManagement>
     </build>
-    <profiles>
-        <profile>
-            <id>direct-runner</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <!-- Makes the DirectRunner available when running a pipeline. -->
-            <dependencies>
-                <dependency>
-                    <groupId>org.apache.beam</groupId>
-                    <artifactId>beam-runners-direct-java</artifactId>
-                    <version>${beam.version}</version>
-                    <scope>runtime</scope>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>dataflow-runner</id>
-            <!-- Makes the DataflowRunner available when running a pipeline. -->
-            <dependencies>
-                <dependency>
-                    <groupId>org.apache.beam</groupId>
-                    <artifactId>beam-runners-google-cloud-dataflow-java</artifactId>
-                    <version>${beam.version}</version>
-                    <scope>runtime</scope>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
+
     <dependencies>
-        <!-- Adds a dependency on the Beam SDK. -->
         <dependency>
             <groupId>org.apache.beam</groupId>
             <artifactId>beam-sdks-java-core</artifactId>
-            <version>${beam.version}</version>
+            <version>${dataflow}</version>
         </dependency>
-        <!-- Adds a dependency on the Beam Google Cloud Platform IO module. -->
         <dependency>
             <groupId>org.apache.beam</groupId>
-            <artifactId>beam-sdks-java-io-google-cloud-platform</artifactId>
-            <version>${beam.version}</version>
-        </dependency>
-        <!-- Dependencies below this line are specific dependencies needed by the examples code. -->
-        <dependency>
-            <groupId>com.google.api-client</groupId>
-            <artifactId>google-api-client</artifactId>
-            <version>${google-clients.version}</version>
-            <exclusions>
-                <!-- Exclude an old version of guava that is being pulled
-             in by a transitive dependency of google-api-client -->
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava-jdk5</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.google.http-client</groupId>
-            <artifactId>google-http-client</artifactId>
-            <version>${google-clients.version}</version>
-            <exclusions>
-                <!-- Exclude an old version of guava that is being pulled
-             in by a transitive dependency of google-api-client -->
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava-jdk5</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>${joda.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
-        </dependency>
-        <!-- Add slf4j API frontend binding with JUL backend -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
-            <version>${slf4j.version}</version>
-            <!-- When loaded at runtime this will wire up slf4j to the JUL backend -->
-            <scope>runtime</scope>
-        </dependency>
-        <!-- The DirectRunner is needed for unit tests. -->
-        <dependency>
-            <groupId>org.apache.beam</groupId>
-            <artifactId>beam-runners-direct-java</artifactId>
-            <version>${beam.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-all</artifactId>
-            <version>${hamcrest.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.mockito</groupId>
-          <artifactId>mockito-core</artifactId>
-          <version>${mockito.version}</version>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
-          <version>${junit.version}</version>
+            <artifactId>beam-sdks-java-extensions-join-library</artifactId>
+            <version>${dataflow}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.beam</groupId>
             <artifactId>beam-runners-google-cloud-dataflow-java</artifactId>
-            <version>${beam.version}</version>
-            <scope>runtime</scope>
+            <version>${dataflow}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.api</groupId>
+                    <artifactId>gax-grpc</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.beam/beam-runners-direct-java -->
+        <dependency>
+            <groupId>org.apache.beam</groupId>
+            <artifactId>beam-runners-direct-java</artifactId>
+            <version>${dataflow}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.beam</groupId>
+            <artifactId>beam-sdks-java-io-google-cloud-platform</artifactId>
+            <version>${dataflow}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.apis</groupId>
+                    <artifactId>google-api-services-pubsub</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.api.grpc</groupId>
+                    <artifactId>grpc-google-cloud-pubsub-v1</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.api.grpc</groupId>
+                    <artifactId>proto-google-cloud-pubsub-v1</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.10.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.7</version>
+        </dependency>
+        <dependency>
+            <groupId>com.demo.test</groupId>
+            <artifactId>validation-rules</artifactId>
+            <version>6.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.beam</groupId>
+            <artifactId>beam-sdks-java-extensions-sql</artifactId>
+            <version>${dataflow}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+            <version>1.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>21.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.21</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-storage</artifactId>
+            <version>1.17.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>21.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.beam</groupId>
+            <artifactId>beam-vendor-guava-20_0</artifactId>
+            <version>0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.beam</groupId>
+            <artifactId>beam-vendor-guava-26_0-jre</artifactId>
+            <version>0.1</version>
         </dependency>
     </dependencies>
 </project>
