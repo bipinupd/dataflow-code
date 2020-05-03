@@ -6,6 +6,14 @@ steps:
   args: ['clean', 'install']
   dir: '$REPO_NAME'
   id: 'Build jar & Run unit test'
+- name: gcr.io/cloud-builders/gcloud
+  entrypoint: bash
+  args:
+    - '-c'
+    - |
+      gsutil cp -r gs://bipin-dev-artifacts/test-pipeline/*.jar \
+      gs://bipin-dev-artifacts/test-pipeline/archive/ || true
+  id: 'Move old jar to archive'
 - name: gcr.io/cloud-builders/gsutil
   args: ['cp', 'target/word-count-beam*.jar', 'gs://${_ARTIFACT_REPO}/test-pipeline/dataflow_deployment_$BUILD_ID.jar']
   dir: '$REPO_NAME'
