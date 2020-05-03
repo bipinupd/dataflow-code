@@ -11,6 +11,6 @@ steps:
   dir: '$REPO_NAME'
   id: 'Move old jar to archive'
 - name: gcr.io/cloud-builders/gsutil
-  args: ['cp', 'target/word-count-beam*.jar', 'gs://${_ARTIFACT_REPO}/dataflow_deployment_$BUILD_ID.jar']
+  args: ['cp', 'target/word-count-beam*.jar', 'gs://${_ARTIFACT_REPO}/test-pipeline/dataflow_deployment_$BUILD_ID.jar']
   dir: '$REPO_NAME'
   id: 'Copy current artifact'
