@@ -3,7 +3,7 @@ steps:
   args: ['clone', 'https://github.com/bipinupd/dataflow-code.git']
   id: 'Checkout source code'
 - name: gcr.io/cloud-builders/mvn
-  args: ['clean install']
+  args: ['clean', 'install']
   dir: '$REPO_NAME'
   id: 'Build jar & Run unit test'
 - name: gcr.io/cloud-builders/gsutil
