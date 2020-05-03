@@ -7,7 +7,7 @@ steps:
   dir: '$REPO_NAME'
   id: 'Build jar & Run unit test'
 - name: gcr.io/cloud-builders/gsutil
-  args: ['cp', 'gs://bipin-dev-artifacts/test-pipeline/*.jar', 'gs://bipin-dev-artifacts/test-pipeline/archive/*.jar']
+  args: ['cp', 'gs://bipin-dev-artifacts/test-pipeline/*.jar', 'gs://bipin-dev-artifacts/test-pipeline/archive/']
   dir: '$REPO_NAME'
   id: 'Move old jar to archive'
 - name: gcr.io/cloud-builders/gsutil
