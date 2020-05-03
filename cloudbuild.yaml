@@ -11,7 +11,7 @@ steps:
   args:
     - '-c'
     - |
-      gsutil cp -r gs://bipin-dev-artifacts/test-pipeline/*.jar \
+      gsutil mv -r gs://bipin-dev-artifacts/test-pipeline/*.jar \
       gs://bipin-dev-artifacts/test-pipeline/archive/ || true
   id: 'Move old jar to archive'
 - name: gcr.io/cloud-builders/gsutil
