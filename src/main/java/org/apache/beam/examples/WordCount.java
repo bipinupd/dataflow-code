@@ -1,7 +1,9 @@
 package org.apache.beam.examples;
 
+import org.apache.beam.runners.dataflow.DataflowPipelineJob;
 import org.apache.beam.runners.dataflow.options.DataflowPipelineOptions;
 import org.apache.beam.sdk.Pipeline;
+import org.apache.beam.sdk.PipelineResult;
 import org.apache.beam.sdk.io.TextIO;
 import org.apache.beam.sdk.metrics.Counter;
 import org.apache.beam.sdk.metrics.Distribution;
@@ -19,6 +21,9 @@ import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.SimpleFunction;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PCollection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class WordCount {
 
   /**
@@ -27,6 +32,7 @@ public class WordCount {
    * a ParDo in the pipeline.
    */
   public static final String TOKENIZER_PATTERN = "[^\\p{L}]+";
+  private static final Logger LOG = LoggerFactory.getLogger(WordCount.class);
 
   static class ExtractWordsFn extends DoFn<String, String> {
     private final Counter emptyLines = Metrics.counter(ExtractWordsFn.class, "emptyLines");
@@ -122,7 +128,9 @@ public class WordCount {
         .apply(MapElements.via(new FormatAsTextFn()))
         .apply("WriteCounts", TextIO.write().to(options.getOutput()));
 
-    p.run();
+    PipelineResult result = p.run();
+    System.out.println(((DataflowPipelineJob) result).getJobId());
+
   }
 
   public static void main(String[] args) {
